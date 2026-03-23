@@ -7,12 +7,15 @@
 
 cat("── VeggieFuel Setup ──────────────────────────────────────────────\n")
 
-required_packages <- c("dplyr", "readr", "tidyr", "ggplot2", "knitr", "scales")
+required_packages <- c("dplyr", "readr", "tidyr", "ggplot2", "scales", "here", "lpSolve")
+
+user_lib <- Sys.getenv("R_LIBS_USER")
+if (!dir.exists(user_lib)) dir.create(user_lib, recursive = TRUE)
 
 install_if_missing <- function(pkg) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
     cat("Installing", pkg, "...\n")
-    install.packages(pkg, repos = "https://cloud.r-project.org")
+    install.packages(pkg, repos = "https://cloud.r-project.org", lib = user_lib)
   }
 }
 

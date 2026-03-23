@@ -11,11 +11,20 @@
 suppressPackageStartupMessages({
   library(dplyr)
   library(readr)
+  library(here)
 })
 
 # ── Load the database ────────────────────────────────────────────────────────
 
-foods <- read_csv("data/foods.csv", show_col_types = FALSE)
+foods <- tryCatch(
+  read_csv(here::here("data", "foods.csv"), show_col_types = FALSE),
+  error = function(e) {
+    stop("Could not load food database at data/foods.csv\n",
+         "  Working directory: ", getwd(), "\n",
+         "  Original error: ", conditionMessage(e),
+         call. = FALSE)
+  }
+)
 
 # Amino acid columns for easy reference
 amino_cols <- c(
@@ -46,6 +55,7 @@ scale_to_serving <- function(food_row, grams) {
 #' @return df with protein_per_100kcal column, sorted descending
 protein_efficiency <- function(df = foods) {
   df %>%
+    filter(kcal > 0) %>%
     mutate(protein_per_100kcal = round(protein_g / kcal * 100, 1)) %>%
     arrange(desc(protein_per_100kcal)) %>%
     select(food, category, kcal, protein_g, protein_per_100kcal)
@@ -61,15 +71,17 @@ top_foods_for_amino <- function(amino, n = 10, df = foods) {
     head(n)
 }
 
-# ── Print summary ────────────────────────────────────────────────────────────
+# ── Print summary (only when run directly) ─────────────────────────────────
 
-cat("── Food Database Loaded ──────────────────────────────────────────\n")
-cat(sprintf("  %d foods across %d categories\n",
-            nrow(foods), n_distinct(foods$category)))
-cat("  Categories:", paste(unique(foods$category), collapse = ", "), "\n")
-cat("──────────────────────────────────────────────────────────────────\n\n")
+if (sys.nframe() == 0) {
+  cat("── Food Database Loaded ──────────────────────────────────────────\n")
+  cat(sprintf("  %d foods across %d categories\n",
+              nrow(foods), n_distinct(foods$category)))
+  cat("  Categories:", paste(unique(foods$category), collapse = ", "), "\n")
+  cat("──────────────────────────────────────────────────────────────────\n\n")
 
-# Quick peek
-cat("Top 10 most protein-efficient foods (g protein per 100 kcal):\n")
-print(protein_efficiency(), n = 10)
-cat("\n")
+  # Quick peek
+  cat("Top 10 most protein-efficient foods (g protein per 100 kcal):\n")
+  print(protein_efficiency(), n = 10)
+  cat("\n")
+}

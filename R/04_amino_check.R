@@ -5,9 +5,10 @@
 # Generates a visual coverage chart and suggests fixes for any gaps.
 # ============================================================================
 
-source("R/00_setup.R")
-source("R/01_food_database.R")
-source("R/02_targets.R")
+if (!requireNamespace("here", quietly = TRUE)) install.packages("here", repos = "https://cloud.r-project.org")
+source(here::here("R", "00_setup.R"))
+source(here::here("R", "01_food_database.R"))
+source(here::here("R", "02_targets.R"))
 
 # ── Analyze amino acid coverage for a food combination ───────────────────────
 
@@ -19,15 +20,24 @@ check_amino_coverage <- function(food_servings, profile = athlete) {
   targets <- compute_amino_targets(profile)
 
   nutrition <- food_servings %>%
-    left_join(foods, by = "food") %>%
+    left_join(foods, by = "food")
+
+  unmatched <- nutrition %>% filter(is.na(kcal)) %>% pull(food) %>% unique()
+  if (length(unmatched) > 0) {
+    stop("Foods not found in database: ", paste(unmatched, collapse = ", "),
+         "\nCheck spelling against data/foods.csv")
+  }
+
+  nutrition <- nutrition %>%
     mutate(across(all_of(amino_cols), ~ .x * grams / 100))
 
   actual_totals <- nutrition %>%
-    summarize(across(all_of(amino_cols), ~ sum(.x, na.rm = TRUE)))
+    summarize(across(all_of(amino_cols), ~ sum(.x)))
 
   targets %>%
+    rowwise() %>%
     mutate(
-      actual_mg = as.numeric(actual_totals[1, csv_column]),
+      actual_mg = pull(actual_totals, csv_column),
       pct       = round(actual_mg / daily_min_mg * 100, 1),
       status    = case_when(
         pct >= 100 ~ "SUFFICIENT",
@@ -35,6 +45,7 @@ check_amino_coverage <- function(food_servings, profile = athlete) {
         TRUE       ~ "DEFICIENT"
       )
     ) %>%
+    ungroup() %>%
     select(amino_acid, daily_min_mg, actual_mg, pct, status, notes)
 }
 
@@ -111,67 +122,43 @@ plot_amino_coverage <- function(coverage, title = "Amino Acid Coverage (% of dai
     )
 }
 
-# ── Run analysis ─────────────────────────────────────────────────────────────
+# ── Run analysis (only when run directly) ─────────────────────────────────────
 
-cat("╔══════════════════════════════════════════════════════════════════╗\n")
-cat("║           VeggieFuel — Amino Acid Coverage Analysis             ║\n")
-cat("╚══════════════════════════════════════════════════════════════════╝\n\n")
+if (sys.nframe() == 0) {
+  cat("╔══════════════════════════════════════════════════════════════════╗\n")
+  cat("║           VeggieFuel — Amino Acid Coverage Analysis             ║\n")
+  cat("╚══════════════════════════════════════════════════════════════════╝\n\n")
 
-# Load meal plans
-trail_plan <- tribble(
-  ~meal,          ~food,                     ~grams,
-  "Breakfast",    "Oats (dry)",               80,
-  "Breakfast",    "Soy milk (unsweetened)",   250,
-  "Breakfast",    "Banana",                   120,
-  "Breakfast",    "Hemp seeds",                20,
-  "Breakfast",    "Peanut butter",             20,
-  "Snack AM",     "Whole wheat bread",         60,
-  "Snack AM",     "Hummus",                    60,
-  "Snack AM",     "Avocado",                   50,
-  "Lunch",        "Quinoa (cooked)",          200,
-  "Lunch",        "Black beans (cooked)",     150,
-  "Lunch",        "Spinach (cooked)",         100,
-  "Lunch",        "Pumpkin seeds",             20,
-  "Lunch",        "Avocado",                   50,
-  "Snack PM",     "Banana",                   120,
-  "Snack PM",     "Almonds",                   30,
-  "Snack PM",     "Greek yogurt",             150,
-  "Dinner",       "Tofu (firm)",              150,
-  "Dinner",       "Brown rice (cooked)",      200,
-  "Dinner",       "Broccoli (cooked)",        150,
-  "Dinner",       "Sesame seeds",              15,
-  "Dinner",       "Edamame",                  100,
-  "Recovery",     "Cottage cheese",           150,
-  "Recovery",     "Chia seeds",                15,
-  "Recovery",     "Banana",                    80,
-)
+  # Load meal plan from shared CSV (single source of truth)
+  trail_plan <- read_csv(here::here("data", "trail_day_plan.csv"), show_col_types = FALSE)
 
-cat("━━━ TRAIL DAY — Amino Acid Coverage ━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
-trail_coverage <- check_amino_coverage(trail_plan)
-print(trail_coverage %>% select(amino_acid, daily_min_mg, actual_mg, pct, status), n = Inf)
-suggest_fixes(trail_coverage)
+  cat("━━━ TRAIL DAY — Amino Acid Coverage ━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+  trail_coverage <- check_amino_coverage(trail_plan)
+  print(trail_coverage %>% select(amino_acid, daily_min_mg, actual_mg, pct, status), n = Inf)
+  suggest_fixes(trail_coverage)
 
-# Generate chart
-dir.create("output", showWarnings = FALSE)
+  # Generate chart
+  dir.create(here::here("output"), showWarnings = FALSE)
 
-p <- plot_amino_coverage(trail_coverage, "Trail Day — Amino Acid Coverage")
-ggsave("output/amino_coverage_trail.png", p, width = 9, height = 5, dpi = 150)
-cat("\nChart saved to output/amino_coverage_trail.png\n")
+  p <- plot_amino_coverage(trail_coverage, "Trail Day — Amino Acid Coverage")
+  ggsave(here::here("output", "amino_coverage_trail.png"), p, width = 9, height = 5, dpi = 150)
+  cat("\nChart saved to output/amino_coverage_trail.png\n")
 
-# ── Also check a custom food combo (interactive use) ─────────────────────────
+  # ── Also check a custom food combo (interactive use) ───────────────────────
 
-cat("\n\n━━━ Quick Check: Custom Food Combo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-cat("Example: checking if a single meal covers amino acids\n\n")
+  cat("\n\n━━━ Quick Check: Custom Food Combo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+  cat("Example: checking if a single meal covers amino acids\n\n")
 
-example_meal <- tibble(
-  food  = c("Lentils (cooked)", "Brown rice (cooked)", "Spinach (cooked)", "Pumpkin seeds"),
-  grams = c(250, 200, 100, 30)
-)
+  example_meal <- tibble(
+    food  = c("Lentils (cooked)", "Brown rice (cooked)", "Spinach (cooked)", "Pumpkin seeds"),
+    grams = c(250, 200, 100, 30)
+  )
 
-single_meal_coverage <- check_amino_coverage(example_meal)
-print(single_meal_coverage %>% select(amino_acid, daily_min_mg, actual_mg, pct, status), n = Inf)
-suggest_fixes(single_meal_coverage)
+  single_meal_coverage <- check_amino_coverage(example_meal)
+  print(single_meal_coverage %>% select(amino_acid, daily_min_mg, actual_mg, pct, status), n = Inf)
+  suggest_fixes(single_meal_coverage)
 
-cat("\n── Done! ──────────────────────────────────────────────────────\n")
-cat("Edit the meal plans in 03_meal_planner.R to customize.\n")
-cat("Use check_amino_coverage() with any food+grams tibble.\n")
+  cat("\n── Done! ──────────────────────────────────────────────────────\n")
+  cat("Edit the meal plans in data/trail_day_plan.csv to customize.\n")
+  cat("Use check_amino_coverage() with any food+grams tibble.\n")
+}

@@ -1,8 +1,8 @@
-# 🌱 VeggieFuel — Vegetarian Meal Planner for Trail & Kayak Athletes
+# 🌱 VeggieFuel — Vegetarian Meal Planner for Athletes
 
-**A small R project that calculates macro + amino acid proficiency for vegetarian sportswomen doing trail running and kayaking.**
+**An R project that calculates macro + amino acid proficiency for vegetarian athletes doing trail running, kayaking, climbing, and swimming.**
 
-VeggieFuel helps you plan meals that hit your protein, carb, fat, and essential amino acid targets — using only vegetarian ingredients. Built for endurance athletes who want to perform without guessing.
+VeggieFuel uses linear programming to generate optimized daily and weekly meal plans that hit your protein, carb, fat, and essential amino acid targets — using only vegetarian ingredients. Supports male and female athletes with personalized BMR-based calorie estimation (Mifflin-St Jeor). Built for endurance athletes who want to perform without guessing.
 
 ---
 
@@ -17,21 +17,43 @@ cd veggie-fuel
 # Double-click veggie-fuel.Rproj (RStudio) or:
 R
 
-# 3. Install dependencies
+# 3. Install dependencies (dplyr, readr, tidyr, ggplot2, scales, here, lpSolve)
 source("R/00_setup.R")
 
-# 4. Generate your weekly meal plan
+# 4. Generate optimized daily meal plans (trail, kayak, rest)
 source("R/03_meal_planner.R")
 
-# 5. Check your amino acid coverage
+# 5. Generate a 7-day weekly plan
+source("R/03b_weekly.R")
+
+# 6. Check amino acid coverage
 source("R/04_amino_check.R")
+
+# 7. Generate visualization charts (radar, bar, heatmap)
+source("R/05_visualize.R")
+
+# 8. Interactive mode (prompts for weight, sport, preferences)
+source("R/06_interactive.R")
+
+# 9. Run tests
+Rscript tests/test_amino.R
+Rscript tests/test_weekly.R
 ```
+
+### Optimizer Features
+
+- **LP-optimized plans** — uses `lpSolve` to minimize macro deviation while guaranteeing all 9 amino acid WHO/FAO minimums
+- **Sport-specific targets** — trail (high carb), kayak (high protein), climbing (power-to-weight), swimming (high expenditure), rest (reduced kcal)
+- **Personalized profiles** — sex, height, weight, age → Mifflin-St Jeor BMR-based calorie targets
+- **Food locks** — "always have oats for breakfast"
+- **Portability constraints** — snack meals on active days only use portable foods
+- **Weekly variety** — 7-day planner enforces food rotation across the week
 
 ---
 
 ## 📋 Copy-Paste Quicksheet
 
-### Daily Targets (60 kg trail/kayak sportswoman)
+### Daily Targets (60 kg female athlete, 165 cm, 30 yr)
 
 | Macro         | Daily Target       | Notes                                    |
 |---------------|--------------------|------------------------------------------|
@@ -65,17 +87,14 @@ Soy + anything       → tofu/tempeh are complete proteins on their own
 Quinoa alone          → all 9 essential amino acids ✓
 ```
 
-### Trail Day vs. Kayak Day Calorie Split
+### Sport-Day Calorie Split
 
 ```
-                 TRAIL DAY (long effort)     KAYAK DAY (upper body)
-Carbs            55–60%                      50–55%
-Protein          15–18%                      18–20%
-Fat              22–28%                      25–30%
-Pre-workout      Oats + banana + nut butter  Toast + eggs + avocado
-During           Dates, energy balls, gels   Bars, trail mix, banana
-Recovery         Smoothie: soy milk +        Cottage cheese + quinoa
-                 banana + hemp seeds          + roasted chickpeas
+              TRAIL         KAYAK         CLIMBING      SWIMMING
+Carbs         55–60%        50–55%        45–50%        55–60%
+Protein       15–18%        18–20%        18–22%        15–18%
+Fat           22–28%        25–30%        28–32%        22–28%
+kcal mult     1.10x         1.00x         0.95x         1.15x
 ```
 
 ### Supplements to Consider
@@ -95,18 +114,24 @@ Recovery         Smoothie: soy milk +        Cottage cheese + quinoa
 ```
 veggie-fuel/
 ├── README.md              ← You are here
+├── CONTRIBUTING.md        ← How to add foods & contribute
 ├── veggie-fuel.Rproj      ← RStudio project file
 ├── R/
 │   ├── 00_setup.R         ← Install & load packages
-│   ├── 01_food_database.R ← Vegetarian food nutrient data
-│   ├── 02_targets.R       ← Athlete profile & daily targets
-│   ├── 03_meal_planner.R  ← Generate daily/weekly meal plans
-│   └── 04_amino_check.R   ← Amino acid coverage analysis
+│   ├── 01_food_database.R ← Vegetarian food nutrient data (80+ foods)
+│   ├── 02_targets.R       ← Athlete profile & daily/sport targets
+│   ├── 03_meal_planner.R  ← Generate optimized daily meal plans
+│   ├── 03a_optimizer.R    ← LP optimizer core (lpSolve)
+│   ├── 03b_weekly.R       ← 7-day weekly planner with variety
+│   ├── 04_amino_check.R   ← Amino acid coverage analysis
+│   ├── 05_visualize.R     ← Radar, stacked bar & heatmap charts
+│   └── 06_interactive.R   ← Terminal-based interactive mode
 ├── data/
-│   └── foods.csv          ← Food nutrient database (macros + aminos)
-├── output/                ← Generated plans & reports go here
+│   └── foods.csv          ← Food nutrient database (macros + aminos + portable + prep_minutes)
+├── output/                ← Generated plans, charts & reports
 ├── tests/
-│   └── test_amino.R       ← Basic validation tests
+│   ├── test_amino.R       ← Core validation tests (40 assertions)
+│   └── test_weekly.R      ← Weekly planner tests (15 assertions)
 ├── .gitignore
 └── LICENSE
 ```
@@ -115,13 +140,21 @@ veggie-fuel/
 
 ## 🏃‍♀️ How It Works
 
-1. **`01_food_database.R`** loads a curated database of ~40 vegetarian foods with full macro and essential amino acid profiles (per 100 g).
+1. **`01_food_database.R`** loads a curated database of 80+ vegetarian foods with full macro and essential amino acid profiles (per 100 g), plus portability and prep time.
 
-2. **`02_targets.R`** defines your athlete profile (weight, sport, training volume) and calculates daily macro + amino acid targets based on current sports nutrition guidelines.
+2. **`02_targets.R`** defines your athlete profile (sex, height, weight, age, sport, training volume) and calculates daily macro + amino acid targets using Mifflin-St Jeor BMR, WHO/FAO 2007, and ACSM guidelines. Includes sport-day adjustments (trail, kayak, climbing, swimming, rest).
 
-3. **`03_meal_planner.R`** generates a sample daily meal plan (breakfast, snack, lunch, snack, dinner, recovery) that meets your targets. It prioritizes complementary protein sources.
+3. **`03a_optimizer.R`** uses linear programming (`lpSolve`) to find the optimal daily plan: minimizes macro deviation while guaranteeing all 9 amino acids meet WHO/FAO minimums. Supports food locks, exclusions, portability constraints, and meal calorie distribution.
 
-4. **`04_amino_check.R`** scores each meal and the full day against amino acid minimums, flags any deficiencies, and suggests fixes.
+4. **`03_meal_planner.R`** orchestrates the optimizer for trail, kayak, climbing, swimming, and rest days. Compares results against targets and saves nutrition breakdowns to CSV.
+
+5. **`03b_weekly.R`** generates a 7-day plan (e.g. 2 trail, 1 kayak, 2 climbing, 1 swimming, 1 rest) with variety constraints — foods that appear too often get excluded in later days.
+
+6. **`04_amino_check.R`** scores each meal and the full day against amino acid minimums, flags any deficiencies, and suggests fixes.
+
+7. **`05_visualize.R`** generates three chart types: amino acid radar chart, macro stacked bar chart per meal, and weekly amino acid coverage heatmap.
+
+8. **`06_interactive.R`** provides a terminal-based interface: enter your sex, height, weight, age, sport, exclusions, and food locks — get an optimized plan instantly.
 
 ---
 
@@ -153,7 +186,7 @@ veggie-fuel/
 
 ## 🤝 Contributing
 
-This is a small personal project — feel free to fork it, add foods, adjust targets, or improve the planner logic. PRs welcome!
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add foods, run tests, and contribute.
 
 ---
 
