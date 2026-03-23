@@ -117,11 +117,18 @@ See [must/README.md](must/README.md) for the full walkthrough.
 
 ---
 
+## 📖 Full Example
+
+See [example.md](example.md) for a complete walkthrough using a real athlete profile (107 kg male, bouldering + trail running) — covers profile setup, interactive mode, daily/weekly plans, computed targets, and a custom R script.
+
+---
+
 ## 📁 Project Structure
 
 ```
 veggie-fuel/
 ├── README.md              ← You are here
+├── example.md             ← Complete usage example (107 kg male climber/runner)
 ├── CONTRIBUTING.md        ← How to add foods & contribute
 ├── veggie-fuel.Rproj      ← RStudio project file
 ├── R/
