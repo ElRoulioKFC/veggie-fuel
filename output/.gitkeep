@@ -1,0 +1,3 @@
+# Output directory
+Generated files (meal plans, charts) go here.
+This directory is .gitignore'd except for this file.
