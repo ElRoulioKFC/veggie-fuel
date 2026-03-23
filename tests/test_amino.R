@@ -49,6 +49,9 @@ assert(abs(scaled$protein_g - tofu$protein_g * 2) < 0.01,
 
 # ── Test 4: Amino coverage function ─────────────────────────────────────────
 
+# Source the amino check functions (suppress its auto-run output)
+invisible(capture.output(suppressMessages(source("R/04_amino_check.R"))))
+
 # A massive amount of food should cover all amino acids
 big_combo <- tibble(
   food  = c("Tofu (firm)", "Lentils (cooked)", "Oats (dry)", "Eggs"),
