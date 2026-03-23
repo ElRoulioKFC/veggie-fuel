@@ -25,4 +25,8 @@ must/logs/*.err
 must/logs/*.log
 must/dag_workflow.dag.*
 
+# Web app
+web/node_modules/
+web/dist/
+
 CLAUDE.md
