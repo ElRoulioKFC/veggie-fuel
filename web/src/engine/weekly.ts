@@ -6,6 +6,8 @@ export async function planWeek(
   profile: AthleteProfile,
   maxFoodAppearances: number = 10,
   locks: FoodLock[] = [],
+  excluded: string[] = [],
+  onProgress?: (day: number) => void,
 ): Promise<WeekPlan> {
   const total = Object.values(weekStructure).reduce((a, b) => a + b, 0);
   if (total !== 7) throw new Error(`week_structure must sum to 7, got ${total}`);
@@ -29,23 +31,25 @@ export async function planWeek(
       .filter(([, count]) => count >= maxFoodAppearances)
       .map(([food]) => food);
 
+    const allExcluded = [...excluded, ...overUsed];
+
     let plan = await optimizeDayPlan(dt, {
       profile,
-      excluded: overUsed,
-      locks,
+      excluded: allExcluded.length > 0 ? allExcluded : undefined,
+      locks: locks.length > 0 ? locks : undefined,
     });
 
     // If infeasible due to too many exclusions, gradually relax
     if (!plan && overUsed.length > 0) {
       const sorted = [...overUsed].sort((a, b) => (foodCounts[a] || 0) - (foodCounts[b] || 0));
-      const remaining = [...overUsed];
+      const remaining = [...allExcluded];
       for (const candidate of sorted) {
         const idx = remaining.indexOf(candidate);
         if (idx >= 0) remaining.splice(idx, 1);
         plan = await optimizeDayPlan(dt, {
           profile,
-          excluded: remaining,
-          locks,
+          excluded: remaining.length > 0 ? remaining : undefined,
+          locks: locks.length > 0 ? locks : undefined,
         });
         if (plan) break;
       }
@@ -59,6 +63,8 @@ export async function planWeek(
     } else {
       plans.push(null);
     }
+
+    onProgress?.(d + 1);
   }
 
   return { plans, dayTypes };

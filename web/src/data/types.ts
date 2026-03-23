@@ -139,6 +139,31 @@ export interface MealNutrition {
   fatG: number;
 }
 
+export interface RecipeIngredient {
+  food: string;
+  grams: number;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  description: string;
+  mealTypes: MealSlot[];
+  servings: number;
+  prepMinutes: number;
+  cookMinutes: number;
+  ingredients: RecipeIngredient[];
+  steps: string[];
+  tags: string[];
+}
+
+export interface RecipeMatch {
+  recipe: Recipe;
+  overlapScore: number;
+  matchedFoods: string[];
+  missingFoods: string[];
+}
+
 export const MEAL_SLOTS: MealSlot[] = ['Breakfast', 'Snack AM', 'Lunch', 'Snack PM', 'Dinner', 'Recovery'];
 export const SPORTS: Sport[] = ['trail', 'kayak', 'climbing', 'swimming', 'rest'];
 export const AMINO_COLS = ['leucineMg', 'isoleucineMg', 'valineMg', 'lysineMg', 'methionineMg', 'threonineMg', 'tryptophanMg', 'phenylalanineMg', 'histidineMg'] as const;

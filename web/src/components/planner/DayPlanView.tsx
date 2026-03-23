@@ -7,9 +7,11 @@ import MealCard from './MealCard';
 
 interface Props {
   items: MealPlanItem[];
+  onSwapFood?: (food: string, meal: MealSlot) => void;
+  onExcludeFood?: (food: string) => void;
 }
 
-export default function DayPlanView({ items }: Props) {
+export default function DayPlanView({ items, onSwapFood, onExcludeFood }: Props) {
   const nutrition = calculatePlanNutrition(items);
 
   // Group by meal
@@ -25,7 +27,15 @@ export default function DayPlanView({ items }: Props) {
       {MEAL_SLOTS.map(slot => {
         const mealItems = byMeal.get(slot) || [];
         if (mealItems.length === 0) return null;
-        return <MealCard key={slot} meal={slot} items={mealItems} />;
+        return (
+          <MealCard
+            key={slot}
+            meal={slot}
+            items={mealItems}
+            onSwapFood={onSwapFood}
+            onExcludeFood={onExcludeFood}
+          />
+        );
       })}
     </Box>
   );

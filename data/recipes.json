@@ -1,0 +1,288 @@
+{
+  "recipes": [
+    {
+      "id": "tofu-scramble",
+      "name": "Tofu Scramble with Spinach",
+      "description": "High-protein breakfast scramble loaded with iron and complete amino acids.",
+      "mealTypes": ["Breakfast"],
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "ingredients": [
+        { "food": "Tofu (firm)", "grams": 200 },
+        { "food": "Spinach (cooked)", "grams": 100 },
+        { "food": "Bell pepper (raw)", "grams": 80 },
+        { "food": "Nutritional yeast", "grams": 10 }
+      ],
+      "steps": [
+        "Drain and press tofu for 10 minutes, then crumble into bite-sized pieces.",
+        "Heat a non-stick pan over medium heat with a drizzle of oil.",
+        "Add crumbled tofu and cook for 5 minutes, stirring occasionally, until slightly golden.",
+        "Add diced bell pepper and cook for 2 minutes.",
+        "Add spinach and cook 2-3 minutes until wilted.",
+        "Sprinkle nutritional yeast, stir well, season with salt, pepper, and turmeric. Serve warm."
+      ],
+      "tags": ["high-protein", "quick", "iron-rich"]
+    },
+    {
+      "id": "overnight-oats",
+      "name": "Overnight Oats with Chia & Banana",
+      "description": "No-cook breakfast packed with slow-release energy and omega-3s.",
+      "mealTypes": ["Breakfast"],
+      "servings": 1,
+      "prepMinutes": 5,
+      "cookMinutes": 0,
+      "ingredients": [
+        { "food": "Oats (dry)", "grams": 80 },
+        { "food": "Chia seeds", "grams": 15 },
+        { "food": "Banana", "grams": 120 },
+        { "food": "Milk (whole)", "grams": 200 }
+      ],
+      "steps": [
+        "Combine oats, chia seeds, and milk in a jar or bowl. Stir well.",
+        "Cover and refrigerate overnight (or at least 4 hours).",
+        "In the morning, slice the banana and layer on top.",
+        "Stir gently and enjoy cold, or microwave 1-2 minutes if preferred warm."
+      ],
+      "tags": ["no-cook", "meal-prep", "omega-3"]
+    },
+    {
+      "id": "lentil-kale-soup",
+      "name": "Lentil Soup with Kale",
+      "description": "Hearty, iron-rich soup perfect for recovery days.",
+      "mealTypes": ["Lunch", "Dinner"],
+      "servings": 3,
+      "prepMinutes": 10,
+      "cookMinutes": 25,
+      "ingredients": [
+        { "food": "Lentils (cooked)", "grams": 300 },
+        { "food": "Kale (cooked)", "grams": 150 },
+        { "food": "Sweet potato (baked)", "grams": 200 },
+        { "food": "Miso paste", "grams": 20 }
+      ],
+      "steps": [
+        "Peel and dice sweet potato into 1 cm cubes.",
+        "In a large pot, sauté sweet potato in a little oil over medium heat for 5 minutes.",
+        "Add 600 ml of water or vegetable broth and bring to a boil.",
+        "Add lentils, reduce heat, and simmer for 15 minutes until sweet potato is tender.",
+        "Stir in chopped kale and cook 3-4 minutes until wilted.",
+        "Remove from heat, dissolve miso paste in a small amount of warm broth, then stir into the soup. Serve hot."
+      ],
+      "tags": ["iron-rich", "recovery", "high-fiber"]
+    },
+    {
+      "id": "chickpea-quinoa-bowl",
+      "name": "Chickpea Quinoa Power Bowl",
+      "description": "Complete protein bowl with all essential amino acids covered.",
+      "mealTypes": ["Lunch"],
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 5,
+      "ingredients": [
+        { "food": "Chickpeas (cooked)", "grams": 200 },
+        { "food": "Quinoa (cooked)", "grams": 200 },
+        { "food": "Avocado", "grams": 100 },
+        { "food": "Spinach (cooked)", "grams": 80 },
+        { "food": "Tahini", "grams": 30 }
+      ],
+      "steps": [
+        "Warm quinoa and chickpeas together in a pan or microwave.",
+        "Wilt spinach in a pan for 2 minutes with a pinch of salt.",
+        "Assemble bowls: layer quinoa, then chickpeas, then spinach.",
+        "Slice avocado and arrange on top.",
+        "Drizzle tahini over the bowl. Season with lemon juice, salt, and pepper."
+      ],
+      "tags": ["complete-protein", "high-protein", "meal-prep"]
+    },
+    {
+      "id": "tempeh-stir-fry",
+      "name": "Tempeh Stir-Fry with Brown Rice",
+      "description": "Savory stir-fry with fermented soy protein and sesame crunch.",
+      "mealTypes": ["Lunch", "Dinner"],
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "ingredients": [
+        { "food": "Tempeh", "grams": 200 },
+        { "food": "Brown rice (cooked)", "grams": 250 },
+        { "food": "Broccoli (cooked)", "grams": 150 },
+        { "food": "Mushrooms (cooked)", "grams": 100 },
+        { "food": "Sesame seeds", "grams": 15 }
+      ],
+      "steps": [
+        "Slice tempeh into thin strips or cubes.",
+        "Heat oil in a wok or large pan over high heat.",
+        "Sear tempeh strips for 3-4 minutes per side until golden and crispy.",
+        "Add broccoli florets and sliced mushrooms. Stir-fry 4-5 minutes.",
+        "Add soy sauce (2 tbsp) and a splash of rice vinegar. Toss to coat.",
+        "Serve over brown rice and sprinkle with sesame seeds."
+      ],
+      "tags": ["high-protein", "fermented", "savory"]
+    },
+    {
+      "id": "black-bean-burrito-bowl",
+      "name": "Black Bean Burrito Bowl",
+      "description": "Tex-Mex inspired bowl loaded with fiber and plant protein.",
+      "mealTypes": ["Lunch", "Dinner"],
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 10,
+      "ingredients": [
+        { "food": "Black beans (cooked)", "grams": 200 },
+        { "food": "Brown rice (cooked)", "grams": 200 },
+        { "food": "Avocado", "grams": 100 },
+        { "food": "Bell pepper (raw)", "grams": 100 },
+        { "food": "Cheddar cheese", "grams": 40 }
+      ],
+      "steps": [
+        "Warm black beans in a pan with cumin, chili powder, and a pinch of salt.",
+        "Dice bell pepper into strips.",
+        "Assemble bowls: layer brown rice, then seasoned black beans.",
+        "Top with sliced avocado and diced bell pepper.",
+        "Grate cheddar cheese over the top. Add salsa or hot sauce to taste."
+      ],
+      "tags": ["high-fiber", "tex-mex", "easy"]
+    },
+    {
+      "id": "pb-banana-toast",
+      "name": "Peanut Butter Banana Toast",
+      "description": "Quick energy-dense snack ideal before morning training.",
+      "mealTypes": ["Breakfast", "Snack AM"],
+      "servings": 1,
+      "prepMinutes": 5,
+      "cookMinutes": 3,
+      "ingredients": [
+        { "food": "Whole wheat bread", "grams": 80 },
+        { "food": "Peanut butter", "grams": 30 },
+        { "food": "Banana", "grams": 100 },
+        { "food": "Hemp seeds", "grams": 10 }
+      ],
+      "steps": [
+        "Toast two slices of whole wheat bread until golden.",
+        "Spread peanut butter evenly on each slice.",
+        "Slice banana and layer on top of peanut butter.",
+        "Sprinkle hemp seeds over the banana slices. Serve immediately."
+      ],
+      "tags": ["quick", "portable", "pre-workout"]
+    },
+    {
+      "id": "greek-yogurt-parfait",
+      "name": "Greek Yogurt Parfait",
+      "description": "Creamy, crunchy parfait rich in protein and antioxidants.",
+      "mealTypes": ["Breakfast", "Snack AM"],
+      "servings": 1,
+      "prepMinutes": 5,
+      "cookMinutes": 0,
+      "ingredients": [
+        { "food": "Greek yogurt", "grams": 200 },
+        { "food": "Oats (dry)", "grams": 30 },
+        { "food": "Blueberries (raw)", "grams": 80 },
+        { "food": "Almonds", "grams": 20 }
+      ],
+      "steps": [
+        "Spoon half the Greek yogurt into a glass or bowl.",
+        "Add a layer of oats and half the blueberries.",
+        "Add the remaining yogurt on top.",
+        "Finish with remaining blueberries and roughly chopped almonds."
+      ],
+      "tags": ["no-cook", "high-protein", "antioxidant"]
+    },
+    {
+      "id": "recovery-smoothie",
+      "name": "Recovery Protein Smoothie",
+      "description": "Post-workout smoothie for rapid muscle recovery.",
+      "mealTypes": ["Recovery"],
+      "servings": 1,
+      "prepMinutes": 5,
+      "cookMinutes": 0,
+      "ingredients": [
+        { "food": "Whey protein powder", "grams": 30 },
+        { "food": "Banana", "grams": 120 },
+        { "food": "Soy milk (unsweetened)", "grams": 250 },
+        { "food": "Peanut butter", "grams": 15 }
+      ],
+      "steps": [
+        "Add soy milk and banana to a blender.",
+        "Add whey protein powder and peanut butter.",
+        "Blend on high for 30-45 seconds until smooth and creamy.",
+        "Pour into a glass and drink within 30 minutes of finishing your workout."
+      ],
+      "tags": ["post-workout", "recovery", "high-protein"]
+    },
+    {
+      "id": "energy-balls",
+      "name": "Trail Mix Energy Balls",
+      "description": "No-bake portable snack perfect for trail days.",
+      "mealTypes": ["Snack AM", "Snack PM"],
+      "servings": 4,
+      "prepMinutes": 15,
+      "cookMinutes": 0,
+      "ingredients": [
+        { "food": "Oats (dry)", "grams": 100 },
+        { "food": "Peanut butter", "grams": 60 },
+        { "food": "Dates (dried)", "grams": 80 },
+        { "food": "Dark chocolate (70%)", "grams": 30 },
+        { "food": "Flaxseed", "grams": 20 }
+      ],
+      "steps": [
+        "Pit dates and soak in warm water for 5 minutes, then drain.",
+        "Blend dates in a food processor until a sticky paste forms.",
+        "In a bowl, combine oats, peanut butter, date paste, and ground flaxseed.",
+        "Chop dark chocolate into small chips and fold into the mixture.",
+        "Roll into 12 balls (about 25g each). Refrigerate for at least 30 minutes.",
+        "Store in an airtight container in the fridge for up to 5 days."
+      ],
+      "tags": ["portable", "no-bake", "meal-prep"]
+    },
+    {
+      "id": "pasta-primavera",
+      "name": "Pasta Primavera",
+      "description": "Veggie-loaded whole wheat pasta with creamy cottage cheese sauce.",
+      "mealTypes": ["Dinner"],
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "ingredients": [
+        { "food": "Pasta (whole wheat cooked)", "grams": 250 },
+        { "food": "Broccoli (cooked)", "grams": 120 },
+        { "food": "Bell pepper (raw)", "grams": 100 },
+        { "food": "Zucchini (cooked)", "grams": 100 },
+        { "food": "Cottage cheese", "grams": 80 }
+      ],
+      "steps": [
+        "Cook whole wheat pasta according to package directions. Reserve 100 ml pasta water before draining.",
+        "While pasta cooks, dice bell pepper and slice zucchini into half-moons.",
+        "Sauté bell pepper and zucchini in olive oil for 4-5 minutes over medium-high heat.",
+        "Add broccoli florets and cook 2 more minutes.",
+        "Toss drained pasta with the vegetables.",
+        "Stir in cottage cheese and a splash of pasta water to create a light creamy sauce. Season with salt, pepper, and Italian herbs."
+      ],
+      "tags": ["high-carb", "dinner", "vegetables"]
+    },
+    {
+      "id": "edamame-miso-bowl",
+      "name": "Edamame Miso Bowl",
+      "description": "Japanese-inspired grain bowl with umami-rich miso dressing.",
+      "mealTypes": ["Lunch", "Dinner"],
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 10,
+      "ingredients": [
+        { "food": "Edamame", "grams": 150 },
+        { "food": "Buckwheat groats (cooked)", "grams": 200 },
+        { "food": "Kale (cooked)", "grams": 100 },
+        { "food": "Miso paste", "grams": 15 },
+        { "food": "Sesame seeds", "grams": 10 }
+      ],
+      "steps": [
+        "Warm buckwheat groats in a pan or microwave.",
+        "Steam or boil edamame for 3-4 minutes until tender.",
+        "Wilt kale in a pan with a splash of water for 2-3 minutes.",
+        "Make miso dressing: whisk miso paste with 2 tbsp warm water, 1 tsp sesame oil, and 1 tsp rice vinegar.",
+        "Assemble bowls: layer buckwheat, edamame, and kale.",
+        "Drizzle miso dressing over the bowl and sprinkle with sesame seeds."
+      ],
+      "tags": ["umami", "complete-protein", "japanese"]
+    }
+  ]
+}

@@ -163,6 +163,31 @@ if (sys.nframe() == 0) {
     cat("\n")
   }
 
+  # ── Recipe suggestions ────────────────────────────────────────────────────
+  source(here::here("R", "07_recipes.R"))
+  all_recipes <- load_recipes()
+
+  for (day_type in names(plans)) {
+    plan <- plans[[day_type]]
+    if (is.null(plan)) next
+
+    matches <- match_recipes_to_plan(plan, all_recipes)
+    has_matches <- any(sapply(matches, function(m) length(m) > 0))
+
+    if (has_matches) {
+      cat(sprintf("── Recipe Suggestions for %s Day ──\n", toupper(day_type)))
+      for (slot in names(matches)) {
+        slot_matches <- matches[[slot]]
+        if (length(slot_matches) == 0) next
+        for (m in slot_matches) {
+          cat(sprintf("  %s → %s (%d%% match)\n",
+                      slot, m$recipe$name, round(m$score * 100)))
+        }
+      }
+      cat("\n")
+    }
+  }
+
   # ── Save plans to CSV ──────────────────────────────────────────────────────
   dir.create(here::here("output"), showWarnings = FALSE)
 

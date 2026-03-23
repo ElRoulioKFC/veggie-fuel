@@ -5,6 +5,7 @@ import AppShell from './components/layout/AppShell';
 import DailyPlannerPage from './pages/DailyPlannerPage';
 import WeeklyPlannerPage from './pages/WeeklyPlannerPage';
 import FoodDatabasePage from './pages/FoodDatabasePage';
+import RecipesPage from './pages/RecipesPage';
 import AboutPage from './pages/AboutPage';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
             <Route path="/" element={<DailyPlannerPage />} />
             <Route path="/weekly" element={<WeeklyPlannerPage />} />
             <Route path="/foods" element={<FoodDatabasePage />} />
+            <Route path="/recipes" element={<RecipesPage />} />
             <Route path="/about" element={<AboutPage />} />
           </Routes>
         </AppShell>

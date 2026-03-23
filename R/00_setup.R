@@ -7,7 +7,7 @@
 
 cat("── VeggieFuel Setup ──────────────────────────────────────────────\n")
 
-required_packages <- c("dplyr", "readr", "tidyr", "ggplot2", "scales", "here", "lpSolve")
+required_packages <- c("dplyr", "readr", "tidyr", "ggplot2", "scales", "here", "lpSolve", "jsonlite")
 
 user_lib <- Sys.getenv("R_LIBS_USER")
 if (!dir.exists(user_lib)) dir.create(user_lib, recursive = TRUE)

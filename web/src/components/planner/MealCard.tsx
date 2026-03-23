@@ -1,13 +1,20 @@
-import { Card, CardContent, Typography, Table, TableBody, TableRow, TableCell, Chip, Box } from '@mui/material';
+import {
+  Card, CardContent, Typography, Table, TableBody, TableRow, TableCell,
+  Chip, Box, IconButton, Tooltip,
+} from '@mui/material';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
+import BlockIcon from '@mui/icons-material/Block';
 import type { MealSlot } from '../../data/types';
 import type { PlanNutritionItem } from '../../engine/nutrition';
 
 interface Props {
   meal: MealSlot;
   items: PlanNutritionItem[];
+  onSwapFood?: (food: string, meal: MealSlot) => void;
+  onExcludeFood?: (food: string) => void;
 }
 
-export default function MealCard({ meal, items }: Props) {
+export default function MealCard({ meal, items, onSwapFood, onExcludeFood }: Props) {
   const totalKcal = Math.round(items.reduce((s, i) => s + i.kcal, 0));
   const totalProtein = Math.round(items.reduce((s, i) => s + i.proteinG, 0) * 10) / 10;
   const totalCarbs = Math.round(items.reduce((s, i) => s + i.carbsG, 0) * 10) / 10;
@@ -33,6 +40,34 @@ export default function MealCard({ meal, items }: Props) {
                 <TableCell align="right" sx={{ py: 0.5, whiteSpace: 'nowrap' }}>{item.grams}g</TableCell>
                 <TableCell align="right" sx={{ py: 0.5, whiteSpace: 'nowrap', color: 'text.secondary' }}>
                   {Math.round(item.kcal)} kcal
+                </TableCell>
+                <TableCell align="right" sx={{ py: 0.5, width: 72 }}>
+                  {(onSwapFood || onExcludeFood) && (
+                    <Box sx={{ display: 'flex', gap: 0 }}>
+                      {onSwapFood && (
+                        <Tooltip title="Swap this food">
+                          <IconButton
+                            size="small"
+                            onClick={() => onSwapFood(item.food, meal)}
+                            sx={{ minWidth: 36, minHeight: 36 }}
+                          >
+                            <ShuffleIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {onExcludeFood && (
+                        <Tooltip title="Exclude from future plans">
+                          <IconButton
+                            size="small"
+                            onClick={() => onExcludeFood(item.food)}
+                            sx={{ minWidth: 36, minHeight: 36 }}
+                          >
+                            <BlockIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
