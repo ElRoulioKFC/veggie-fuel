@@ -26,7 +26,7 @@ suppressPackageStartupMessages(library(tidyr))
 #' @return List with $plans (list of 7 tibbles), $day_types (character vector),
 #'   $summary (weekly aggregate)
 plan_week <- function(
-    week_structure     = c(trail = 3, kayak = 2, rest = 2),
+    week_structure     = default_week_structure(athlete),
     profile            = athlete,
     max_food_appearances = 10,
     locks              = NULL

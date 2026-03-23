@@ -1,6 +1,6 @@
 export type Sport = 'trail' | 'kayak' | 'climbing' | 'swimming' | 'rest';
 export type MealSlot = 'Breakfast' | 'Snack AM' | 'Lunch' | 'Snack PM' | 'Dinner' | 'Recovery';
-export type Goal = 'performance' | 'muscle_gain' | 'weight_loss';
+export type Goal = 'performance' | 'muscle_gain' | 'weight_loss' | 'recomposition';
 export type FoodCategory = 'soy' | 'legume' | 'grain' | 'dairy_egg' | 'nut_seed' | 'vegetable' | 'fruit' | 'protein' | 'sport';
 
 export interface AthleteProfile {

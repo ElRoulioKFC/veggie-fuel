@@ -58,9 +58,22 @@ run_interactive <- function() {
   age    <- ask_numeric("Age (years)", default = 30, min_val = 10, max_val = 100)
   weight <- ask_numeric("Body weight (kg)", default = if (sex == "male") 75 else 60,
                         min_val = 30, max_val = 200)
-  sport  <- ask_choice("Primary sport",
-                       c("trail", "kayak", "climbing", "swimming", "all"), default = "trail")
+  cat("  Available sports: trail, kayak, climbing, swimming\n")
+  sport_input <- ask("Your sports (comma-separated, or 'all')", default = "trail",
+                     validate = function(x) {
+                       if (tolower(x) == "all") return(TRUE)
+                       chosen <- trimws(strsplit(x, ",")[[1]])
+                       all(chosen %in% c("trail", "kayak", "climbing", "swimming"))
+                     })
+  if (tolower(sport_input) == "all") {
+    chosen_sports <- c("trail", "kayak", "climbing", "swimming")
+  } else {
+    chosen_sports <- trimws(strsplit(sport_input, ",")[[1]])
+  }
   hours  <- ask_numeric("Training hours per week", default = 10, min_val = 1, max_val = 40)
+  goal   <- ask_choice("Training goal",
+                       c("performance", "weight_loss", "muscle_gain", "recomposition"),
+                       default = "performance")
 
   profile <- list(
     name              = "Athlete",
@@ -68,10 +81,11 @@ run_interactive <- function() {
     height_cm         = height,
     weight_kg         = weight,
     age_years         = age,
-    sport_primary     = if (sport == "all") "trail" else sport,
-    sport_secondary   = if (sport == "all") "kayak" else sport,
+    sports            = chosen_sports,
+    sport_primary     = chosen_sports[1],
+    sport_secondary   = if (length(chosen_sports) > 1) chosen_sports[2] else chosen_sports[1],
     training_hours_week = hours,
-    goal              = "performance"
+    goal              = goal
   )
 
   # 2. Food exclusions
@@ -101,9 +115,9 @@ run_interactive <- function() {
     }
   }
 
-  # 4. Day type
-  day_type <- ask_choice("Generate plan for",
-                         c("trail", "kayak", "climbing", "swimming", "rest"), default = "trail")
+  # 4. Day type (only the athlete's sports + rest)
+  day_choices <- c(get_athlete_sports(profile), "rest")
+  day_type <- ask_choice("Generate plan for", day_choices, default = day_choices[1])
 
   # 5. Generate
   repeat {

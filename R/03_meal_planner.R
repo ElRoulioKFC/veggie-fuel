@@ -19,22 +19,24 @@ source(here::here("R", "03a_optimizer.R"))
 # ── Generate or load meal plans ────────────────────────────────────────────
 # Optimizer is the default; CSV fallback if plans exist and optimizer fails
 
-trail_day_plan    <- optimize_day_plan("trail")
-kayak_day_plan    <- optimize_day_plan("kayak")
-climbing_day_plan <- optimize_day_plan("climbing")
-swimming_day_plan <- optimize_day_plan("swimming")
-rest_day_plan     <- optimize_day_plan("rest")
+# Generate plans only for the athlete's sports + rest
+athlete_day_types <- c(get_athlete_sports(athlete), "rest")
+day_plans <- setNames(lapply(athlete_day_types, optimize_day_plan), athlete_day_types)
 
 # CSV fallback if optimizer returned NULL
-for (dt in c("trail", "kayak", "climbing", "swimming")) {
-  plan_var <- paste0(dt, "_day_plan")
-  if (is.null(get(plan_var))) {
+for (dt in athlete_day_types) {
+  if (is.null(day_plans[[dt]])) {
     csv_path <- here::here("data", paste0(dt, "_day_plan.csv"))
     if (file.exists(csv_path)) {
-      assign(plan_var, read_csv(csv_path, show_col_types = FALSE), envir = .GlobalEnv)
+      day_plans[[dt]] <- read_csv(csv_path, show_col_types = FALSE)
       message("Using CSV fallback for ", dt, " day plan")
     }
   }
+}
+
+# Expose individual plan variables for backward compat
+for (dt in names(day_plans)) {
+  assign(paste0(dt, "_day_plan"), day_plans[[dt]], envir = .GlobalEnv)
 }
 
 # ── Calculate totals for a meal plan ─────────────────────────────────────────
@@ -113,9 +115,7 @@ if (sys.nframe() == 0) {
   cat("║             VeggieFuel — Daily Meal Plan Generator              ║\n")
   cat("╚══════════════════════════════════════════════════════════════════╝\n\n")
 
-  plans <- list(trail = trail_day_plan, kayak = kayak_day_plan,
-                climbing = climbing_day_plan, swimming = swimming_day_plan,
-                rest = rest_day_plan)
+  plans <- day_plans
 
   for (day_type in names(plans)) {
     plan <- plans[[day_type]]

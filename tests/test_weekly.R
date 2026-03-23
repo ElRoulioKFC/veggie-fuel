@@ -95,6 +95,26 @@ assert(length(weekly_all$plans) == 7, "Mixed-sport week returns 7 plans")
 assert(sum(weekly_all$day_types == "climbing") == 2, "2 climbing days in mixed week")
 assert(sum(weekly_all$day_types == "swimming") == 1, "1 swimming day in mixed week")
 
+# ── Test 8: Default week structure from profile sports ────────────────────────
+
+ws_default <- default_week_structure(list(weight_kg = 60, sports = c("trail", "kayak")))
+assert(sum(ws_default) == 7, "Default week structure sums to 7")
+assert("rest" %in% names(ws_default), "Default week structure includes rest")
+assert(all(c("trail", "kayak") %in% names(ws_default)),
+       "Default week structure includes profile sports")
+
+ws_3sport <- default_week_structure(list(weight_kg = 60, sports = c("trail", "kayak", "climbing")))
+assert(sum(ws_3sport) == 7, "3-sport week structure sums to 7")
+assert(ws_3sport["rest"] == 2, "3-sport week has 2 rest days")
+
+# ── Test 9: plan_week with profile-driven default ────────────────────────────
+
+weekly_default <- plan_week()
+assert(length(weekly_default$plans) == 7, "Default plan_week returns 7 plans")
+# Default profile has trail + kayak, so only those + rest should appear
+assert(all(weekly_default$day_types %in% c("trail", "kayak", "rest")),
+       "Default week only contains profile sports + rest")
+
 # ── Results ──────────────────────────────────────────────────────────────────
 
 cat(sprintf("\n%d tests run, %d failed.\n", tests, errors))

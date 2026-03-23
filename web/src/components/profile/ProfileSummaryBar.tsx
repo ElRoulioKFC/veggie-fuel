@@ -19,6 +19,7 @@ export default function ProfileSummaryBar() {
 
   const sportLabel = (s: string | null) => s ? s.charAt(0).toUpperCase() + s.slice(1) : null;
   const sports = [sportLabel(profile.sportPrimary), sportLabel(profile.sportSecondary)].filter(Boolean);
+  const goalLabel = profile.goal.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
   return (
     <Card sx={{ mb: 2 }}>
@@ -41,6 +42,7 @@ export default function ProfileSummaryBar() {
               {sports.map((s) => (
                 <Chip key={s} label={s} size="small" color="primary" variant="outlined" />
               ))}
+              <Chip label={goalLabel} size="small" color="secondary" variant="outlined" />
             </Box>
             <Typography variant="body2" color="text.secondary">
               {profile.trainingHoursWeek}h/wk

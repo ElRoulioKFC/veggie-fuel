@@ -23,10 +23,11 @@ athlete <- list(
   height_cm         = 165,            # height in cm
   weight_kg         = 60,
   age_years         = 30,             # age in years
-  sport_primary     = "trail",        # "trail", "kayak", "climbing", or "swimming"
-  sport_secondary   = "kayak",
+  sports            = c("trail", "kayak"),  # subset of: "trail", "kayak", "climbing", "swimming"
+  sport_primary     = "trail",        # kept for backward compat
+  sport_secondary   = "kayak",        # kept for backward compat
   training_hours_week = 10,           # hours per week
-  goal              = "performance"   # "performance", "muscle_gain", or "weight_loss"
+  goal              = "performance"   # "performance", "muscle_gain", "weight_loss", or "recomposition"
 )
 
 # ── Profile validation ──────────────────────────────────────────────────────
@@ -38,10 +39,58 @@ validate_profile <- function(profile) {
   if (profile$weight_kg <= 0 || profile$weight_kg > 300) {
     stop("weight_kg must be between 0 and 300, got: ", profile$weight_kg)
   }
+  # Validate sports field if present
+  if (!is.null(profile$sports)) {
+    valid <- c("trail", "kayak", "climbing", "swimming")
+    bad <- setdiff(profile$sports, valid)
+    if (length(bad) > 0) {
+      stop("Unknown sport(s): ", paste(bad, collapse = ", "),
+           ". Valid: ", paste(valid, collapse = ", "))
+    }
+  }
+  # Validate goal if present
+  if (!is.null(profile$goal)) {
+    valid_goals <- c("performance", "weight_loss", "muscle_gain", "recomposition")
+    if (!(profile$goal %in% valid_goals)) {
+      stop("Unknown goal: ", profile$goal, ". Valid: ", paste(valid_goals, collapse = ", "))
+    }
+  }
   # Backward-compatible: apply defaults for optional fields
   if (is.null(profile$sex))        profile$sex        <- "female"
   if (is.null(profile$height_cm))  profile$height_cm  <- 165
   if (is.null(profile$age_years))  profile$age_years  <- 30
+}
+
+# ── Sport helpers ────────────────────────────────────────────────────────────
+
+#' Extract the athlete's active sports from a profile
+#' Falls back to sport_primary/sport_secondary for legacy profiles
+get_athlete_sports <- function(profile) {
+  valid_sports <- c("trail", "kayak", "climbing", "swimming")
+  if (!is.null(profile$sports)) {
+    sports <- intersect(profile$sports, valid_sports)
+  } else {
+    sports <- unique(c(profile$sport_primary, profile$sport_secondary))
+    sports <- intersect(sports, valid_sports)
+  }
+  if (length(sports) == 0) sports <- "trail"
+  sports
+}
+
+#' Build a default 7-day week structure from the athlete's sports
+#' Distributes 5 active days across sports, plus 2 rest days
+default_week_structure <- function(profile = athlete) {
+  sports <- get_athlete_sports(profile)
+  n_sports <- length(sports)
+  active_days <- 5
+  base <- active_days %/% n_sports
+  remainder <- active_days %% n_sports
+  counts <- rep(base, n_sports)
+  if (remainder > 0) {
+    counts[seq_len(remainder)] <- counts[seq_len(remainder)] + 1
+  }
+  structure <- setNames(counts, sports)
+  c(structure, rest = 2)
 }
 
 # ── Macro Targets ────────────────────────────────────────────────────────────
@@ -64,13 +113,17 @@ compute_macro_targets <- function(profile) {
   # Activity factor based on training hours/week
   activity_factor <- if (hrs <= 3) 1.375 else if (hrs <= 6) 1.55 else if (hrs <= 10) 1.725 else 1.9
 
-  total_kcal <- bmr * activity_factor
+  # Goal-based modifiers
+  goal_val <- if (!is.null(profile$goal)) profile$goal else "performance"
+  gm <- goal_modifiers %>% filter(goal == goal_val)
+  if (nrow(gm) == 0) gm <- goal_modifiers %>% filter(goal == "performance")
 
-  # Protein: 1.6–1.8 g/kg for veg endurance athletes (use 1.7 midpoint)
-  protein_g <- w * 1.7
+  total_kcal <- bmr * activity_factor * gm$kcal_mult
 
-  # Carbs: 6–8 g/kg for endurance training (use 7 midpoint)
-  carbs_g <- w * 7
+  # Protein & carbs scaled by goal
+  protein_g <- w * gm$protein_per_kg
+
+  carbs_g <- w * gm$carbs_per_kg
 
   # Fat: remainder of calories after protein + carbs
   protein_kcal <- protein_g * 4
@@ -89,9 +142,9 @@ compute_macro_targets <- function(profile) {
     daily_target = round(c(total_kcal, protein_g, carbs_g, fat_g, fiber_g), 0),
     unit        = c("kcal", "g", "g", "g", "g"),
     notes       = c(
-      sprintf("Mifflin-St Jeor BMR × %.3f (%s, %gcm, %gyr)", activity_factor, sex, h, age),
-      sprintf("1.7 g/kg × %g kg", w),
-      sprintf("7 g/kg × %g kg", w),
+      sprintf("Mifflin-St Jeor BMR × %.3f × %.2f (%s, %gcm, %gyr, %s)", activity_factor, gm$kcal_mult, sex, h, age, goal_val),
+      sprintf("%.1f g/kg × %g kg (%s)", gm$protein_per_kg, w, goal_val),
+      sprintf("%.1f g/kg × %g kg (%s)", gm$carbs_per_kg, w, goal_val),
       sprintf("%.0f%% of total kcal", fat_kcal / total_kcal * 100),
       "Adequate intake range"
     )
@@ -141,6 +194,23 @@ sport_day_adjustments <- tibble(
   )
 )
 
+# ── Goal modifiers ─────────────────────────────────────────────────────────
+# Adjust base macro targets based on athlete's training objective.
+# Applied BEFORE sport-day adjustments. Amino acid targets are unaffected.
+
+goal_modifiers <- tibble(
+  goal           = c("performance", "weight_loss", "muscle_gain", "recomposition"),
+  kcal_mult      = c(1.00,          0.85,          1.10,          1.00),
+  protein_per_kg = c(1.7,           2.0,           2.0,           2.2),
+  carbs_per_kg   = c(7.0,           5.0,           7.0,           5.5),
+  description    = c(
+    "Balanced for sport performance",
+    "15% deficit, high protein to preserve muscle",
+    "10% surplus + high protein",
+    "Maintenance kcal, highest protein, moderate carbs"
+  )
+)
+
 # ── Day-type adjusted targets ──────────────────────────────────────────────
 # Apply sport_day_adjustments to get day-specific macro targets.
 # Amino acid targets stay fixed (WHO/FAO minimums depend on body weight only).
@@ -186,8 +256,8 @@ if (sys.nframe() == 0) {
   cat(sprintf("  Name: %s | Sex: %s | Height: %g cm | Weight: %g kg | Age: %g yr\n",
               athlete$name, athlete$sex, athlete$height_cm,
               athlete$weight_kg, athlete$age_years))
-  cat(sprintf("  Sports: %s + %s | Training: %g hrs/week | Goal: %s\n",
-              athlete$sport_primary, athlete$sport_secondary,
+  cat(sprintf("  Sports: %s | Training: %g hrs/week | Goal: %s\n",
+              paste(get_athlete_sports(athlete), collapse = ", "),
               athlete$training_hours_week, athlete$goal))
   cat("──────────────────────────────────────────────────────────────────\n\n")
 

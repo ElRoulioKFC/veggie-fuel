@@ -1,4 +1,4 @@
-import type { AthleteProfile, MacroTargets, AminoTarget, Sport } from '../data/types';
+import type { AthleteProfile, MacroTargets, AminoTarget, Sport, Goal } from '../data/types';
 
 const AMINO_REQUIREMENTS_PER_KG: { aminoAcid: string; mgPerKg: number; csvColumn: string; notes: string }[] = [
   { aminoAcid: 'leucine', mgPerKg: 39, csvColumn: 'leucineMg', notes: 'BCAA — muscle repair' },
@@ -29,6 +29,25 @@ const SPORT_DAY_ADJUSTMENTS: SportDayAdjustment[] = [
   { sport: 'rest', carbPct: 0.50, proteinPct: 0.18, fatPct: 0.32, kcalMult: 0.80, description: 'Rest day: reduced calories, maintain protein' },
 ];
 
+interface GoalModifier {
+  goal: Goal;
+  kcalMult: number;
+  proteinPerKg: number;
+  carbsPerKg: number;
+  description: string;
+}
+
+const GOAL_MODIFIERS: GoalModifier[] = [
+  { goal: 'performance',   kcalMult: 1.00, proteinPerKg: 1.7, carbsPerKg: 7.0, description: 'Balanced for sport performance' },
+  { goal: 'weight_loss',   kcalMult: 0.85, proteinPerKg: 2.0, carbsPerKg: 5.0, description: '15% deficit, high protein to preserve muscle' },
+  { goal: 'muscle_gain',   kcalMult: 1.10, proteinPerKg: 2.0, carbsPerKg: 7.0, description: '10% surplus + high protein' },
+  { goal: 'recomposition', kcalMult: 1.00, proteinPerKg: 2.2, carbsPerKg: 5.5, description: 'Maintenance kcal, highest protein, moderate carbs' },
+];
+
+export function getGoalModifiers() {
+  return GOAL_MODIFIERS;
+}
+
 export function validateProfile(profile: AthleteProfile): void {
   if (profile.weightKg <= 0 || profile.weightKg > 300) {
     throw new Error(`weight must be between 0 and 300, got: ${profile.weightKg}`);
@@ -50,12 +69,14 @@ export function computeMacroTargets(profile: AthleteProfile): MacroTargets {
   // Activity factor based on training hours/week
   const activityFactor = hrs <= 3 ? 1.375 : hrs <= 6 ? 1.55 : hrs <= 10 ? 1.725 : 1.9;
 
-  let totalKcal = bmr * activityFactor;
+  // Goal-based modifiers
+  const gm = GOAL_MODIFIERS.find(g => g.goal === profile.goal) ?? GOAL_MODIFIERS[0];
 
-  // Protein: 1.7 g/kg for veg endurance athletes
-  const proteinG = Math.round(w * 1.7);
-  // Carbs: 7 g/kg for endurance training
-  const carbsG = Math.round(w * 7);
+  let totalKcal = bmr * activityFactor * gm.kcalMult;
+
+  // Protein & carbs scaled by goal
+  const proteinG = Math.round(w * gm.proteinPerKg);
+  const carbsG = Math.round(w * gm.carbsPerKg);
   // Fat: remainder of calories
   const proteinKcal = proteinG * 4;
   const carbsKcal = carbsG * 4;

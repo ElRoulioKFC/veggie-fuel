@@ -224,16 +224,11 @@ if (sys.nframe() == 0) {
   # Source the planner functions we need
   source(here::here("R", "03_meal_planner.R"))
 
-  # Generate charts for each day type
-  day_plans <- list(
-    trail    = trail_day_plan,
-    kayak    = kayak_day_plan,
-    climbing = climbing_day_plan,
-    swimming = swimming_day_plan
-  )
+  # Generate charts for each day type (uses dynamic day_plans from 03_meal_planner.R)
+  day_plans_viz <- day_plans[names(day_plans) != "rest"]
 
-  for (day_label in names(day_plans)) {
-    plan <- day_plans[[day_label]]
+  for (day_label in names(day_plans_viz)) {
+    plan <- day_plans_viz[[day_label]]
     if (!is.null(plan)) {
       nutr   <- calculate_plan_nutrition(plan)
       totals <- summarize_plan(nutr)

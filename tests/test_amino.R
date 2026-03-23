@@ -121,19 +121,26 @@ assert(all(amino_comp$pct > 0), "All amino percentages are positive")
 # Trail plan meets all amino acid targets
 assert(all(amino_comp$pct >= 100), "Optimized trail plan meets all amino acid targets")
 
-# Kayak, climbing, swimming, and rest plans exist
+# Default profile sports (trail, kayak) + rest plans exist
 assert(!is.null(kayak_day_plan), "Optimizer generated a kayak day plan")
-assert(!is.null(climbing_day_plan), "Optimizer generated a climbing day plan")
-assert(!is.null(swimming_day_plan), "Optimizer generated a swimming day plan")
 assert(!is.null(rest_day_plan), "Optimizer generated a rest day plan")
 
-# All plans have correct columns
-for (plan_name in c("trail_day_plan", "kayak_day_plan", "climbing_day_plan",
-                     "swimming_day_plan", "rest_day_plan")) {
+# All default profile plans have correct columns
+for (plan_name in c("trail_day_plan", "kayak_day_plan", "rest_day_plan")) {
   plan <- get(plan_name)
   if (!is.null(plan)) {
     assert(all(c("meal", "food", "grams") %in% names(plan)),
            sprintf("%s has meal, food, grams columns", plan_name))
+  }
+}
+
+# Verify optimizer works for all sports when called directly
+for (s in c("climbing", "swimming")) {
+  p <- optimize_day_plan(s)
+  assert(!is.null(p), sprintf("Optimizer generates %s plan on demand", s))
+  if (!is.null(p)) {
+    assert(all(c("meal", "food", "grams") %in% names(p)),
+           sprintf("On-demand %s plan has correct columns", s))
   }
 }
 
@@ -213,6 +220,86 @@ legacy_profile <- list(
 legacy_targets <- compute_macro_targets(legacy_profile)
 assert(legacy_targets$daily_target[legacy_targets$nutrient == "protein_g"] > 0,
        "Legacy profile (no sex/height/age) still works with defaults")
+
+# ── Test 15: get_athlete_sports and backward compat ──────────────────────────
+
+# Profile with sports field
+sports_profile <- list(weight_kg = 60, sports = c("trail", "climbing"))
+assert(identical(get_athlete_sports(sports_profile), c("trail", "climbing")),
+       "get_athlete_sports returns sports field when present")
+
+# Legacy profile (no sports field) — falls back to primary/secondary
+legacy_sports <- get_athlete_sports(legacy_profile)
+assert("trail" %in% legacy_sports, "Legacy profile: get_athlete_sports includes sport_primary")
+
+# Profile with invalid sports
+err <- tryCatch(validate_profile(list(weight_kg = 60, sports = c("curling"))),
+                error = function(e) e)
+assert(inherits(err, "error"), "Invalid sport in sports field causes error")
+
+# ── Test 16: default_week_structure ──────────────────────────────────────────
+
+ws_2sport <- default_week_structure(list(weight_kg = 60, sports = c("trail", "kayak")))
+assert(sum(ws_2sport) == 7, "2-sport week structure sums to 7")
+assert("rest" %in% names(ws_2sport), "Week structure includes rest")
+assert(all(c("trail", "kayak") %in% names(ws_2sport)), "Week structure includes profile sports")
+
+ws_1sport <- default_week_structure(list(weight_kg = 60, sports = c("climbing")))
+assert(sum(ws_1sport) == 7, "1-sport week structure sums to 7")
+assert(ws_1sport["climbing"] == 5, "Single sport gets 5 active days")
+assert(ws_1sport["rest"] == 2, "Single sport still has 2 rest days")
+
+# ── Test 17: Goal modifiers change targets correctly ─────────────────────────
+
+perf_profile <- list(weight_kg = 60, goal = "performance")
+wl_profile   <- list(weight_kg = 60, goal = "weight_loss")
+mg_profile   <- list(weight_kg = 60, goal = "muscle_gain")
+rc_profile   <- list(weight_kg = 60, goal = "recomposition")
+
+perf_t <- compute_macro_targets(perf_profile)
+wl_t   <- compute_macro_targets(wl_profile)
+mg_t   <- compute_macro_targets(mg_profile)
+rc_t   <- compute_macro_targets(rc_profile)
+
+perf_kcal <- perf_t$daily_target[perf_t$nutrient == "kcal"]
+wl_kcal   <- wl_t$daily_target[wl_t$nutrient == "kcal"]
+mg_kcal   <- mg_t$daily_target[mg_t$nutrient == "kcal"]
+rc_kcal   <- rc_t$daily_target[rc_t$nutrient == "kcal"]
+
+# Calorie ordering: weight_loss < recomposition < performance (due to lower carbs) < muscle_gain
+assert(wl_kcal < perf_kcal, "Weight loss has fewer kcal than performance")
+assert(mg_kcal > perf_kcal, "Muscle gain has more kcal than performance")
+assert(wl_kcal < rc_kcal,   "Weight loss has fewer kcal than recomposition")
+
+# Protein ordering: recomposition > muscle_gain = weight_loss > performance
+perf_p <- perf_t$daily_target[perf_t$nutrient == "protein_g"]
+wl_p   <- wl_t$daily_target[wl_t$nutrient == "protein_g"]
+mg_p   <- mg_t$daily_target[mg_t$nutrient == "protein_g"]
+rc_p   <- rc_t$daily_target[rc_t$nutrient == "protein_g"]
+
+assert(wl_p > perf_p, "Weight loss has higher protein than performance")
+assert(mg_p > perf_p, "Muscle gain has higher protein than performance")
+assert(rc_p > mg_p,   "Recomposition has highest protein")
+
+# Carb ordering: weight_loss < recomposition < performance = muscle_gain
+perf_c <- perf_t$daily_target[perf_t$nutrient == "carbs_g"]
+wl_c   <- wl_t$daily_target[wl_t$nutrient == "carbs_g"]
+rc_c   <- rc_t$daily_target[rc_t$nutrient == "carbs_g"]
+
+assert(wl_c < perf_c, "Weight loss has fewer carbs than performance")
+assert(rc_c < perf_c, "Recomposition has fewer carbs than performance")
+assert(rc_c > wl_c,   "Recomposition has more carbs than weight loss")
+
+# Amino targets unchanged by goal
+perf_aa <- compute_amino_targets(perf_profile)
+wl_aa   <- compute_amino_targets(wl_profile)
+assert(all(perf_aa$daily_min_mg == wl_aa$daily_min_mg),
+       "Amino targets are identical regardless of goal")
+
+# Goal validation — invalid goal should error
+err <- tryCatch(compute_macro_targets(list(weight_kg = 60, goal = "bulking")),
+                error = function(e) e)
+assert(inherits(err, "error"), "Invalid goal causes error")
 
 # ── Results ──────────────────────────────────────────────────────────────────
 

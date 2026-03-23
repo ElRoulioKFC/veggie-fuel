@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { useProfileStore } from '../../store/useProfileStore';
 import { SPORTS } from '../../data/types';
+import type { Goal } from '../../data/types';
 
 export default function AthleteForm() {
   const { profile, updateField } = useProfileStore();
@@ -55,7 +56,7 @@ export default function AthleteForm() {
               slotProps={{ htmlInput: { min: 14, max: 80 } }}
             />
           </Grid>
-          <Grid size={{ xs: 6, sm: 4 }}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Primary Sport</InputLabel>
               <Select
@@ -69,7 +70,7 @@ export default function AthleteForm() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 6, sm: 4 }}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Secondary Sport</InputLabel>
               <Select
@@ -84,7 +85,22 @@ export default function AthleteForm() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Goal</InputLabel>
+              <Select
+                value={profile.goal}
+                label="Goal"
+                onChange={e => updateField('goal', e.target.value as Goal)}
+              >
+                <MenuItem value="performance">Performance</MenuItem>
+                <MenuItem value="weight_loss">Weight Loss</MenuItem>
+                <MenuItem value="muscle_gain">Muscle Gain</MenuItem>
+                <MenuItem value="recomposition">Recomposition</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <Box sx={{ px: 1 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Training: {profile.trainingHoursWeek} hrs/week

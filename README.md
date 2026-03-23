@@ -35,19 +35,44 @@ source("R/05_visualize.R")
 # 8. Interactive mode (prompts for weight, sport, preferences)
 source("R/06_interactive.R")
 
-# 9. Run tests
+# 9. Browse recipes with nutrition info
+source("R/07_recipes.R")
+
+# 10. Run tests
 Rscript tests/test_amino.R
 Rscript tests/test_weekly.R
+Rscript tests/test_recipes.R
 ```
+
+### Recipe Cookbook
+
+VeggieFuel includes 12 curated cooking recipes built from the food database:
+
+- **Breakfast** — Tofu Scramble, Overnight Oats, PB Banana Toast, Greek Yogurt Parfait
+- **Lunch/Dinner** — Lentil Soup, Chickpea Quinoa Bowl, Tempeh Stir-Fry, Black Bean Burrito Bowl, Pasta Primavera, Edamame Miso Bowl
+- **Snacks** — Trail Mix Energy Balls
+- **Recovery** — Recovery Protein Smoothie
+
+Each recipe includes full ingredients (with gram quantities), step-by-step cooking instructions, prep/cook time, and auto-calculated nutrition from the food database. After generating a meal plan, the system suggests matching recipes based on ingredient overlap.
 
 ### Optimizer Features
 
 - **LP-optimized plans** — uses `lpSolve` to minimize macro deviation while guaranteeing all 9 amino acid WHO/FAO minimums
 - **Sport-specific targets** — trail (high carb), kayak (high protein), climbing (power-to-weight), swimming (high expenditure), rest (reduced kcal)
-- **Personalized profiles** — sex, height, weight, age → Mifflin-St Jeor BMR-based calorie targets
+- **Personalized profiles** — sex, height, weight, age, sports → Mifflin-St Jeor BMR-based calorie targets; plans are generated only for your chosen sports
 - **Food locks** — "always have oats for breakfast"
 - **Portability constraints** — snack meals on active days only use portable foods
 - **Weekly variety** — 7-day planner enforces food rotation across the week
+- **Goal-based targets** — adjust macros based on your training objective:
+
+| Goal | Calories | Protein | Carbs | Use Case |
+|------|----------|---------|-------|----------|
+| **Performance** (default) | Maintenance | 1.7 g/kg | 7.0 g/kg | Optimize for sport output |
+| **Weight Loss** | -15% deficit | 2.0 g/kg | 5.0 g/kg | Cut body fat, preserve muscle |
+| **Muscle Gain** | +10% surplus | 2.0 g/kg | 7.0 g/kg | Build muscle mass |
+| **Recomposition** | Maintenance | 2.2 g/kg | 5.5 g/kg | Simultaneous fat loss + muscle gain |
+
+Fat is always calculated as the calorie remainder. Amino acid minimums (WHO/FAO) are not affected by goal.
 
 ---
 
@@ -165,7 +190,7 @@ veggie-fuel/
 
 1. **`01_food_database.R`** loads a curated database of 80+ vegetarian foods with full macro and essential amino acid profiles (per 100 g), plus portability and prep time.
 
-2. **`02_targets.R`** defines your athlete profile (sex, height, weight, age, sport, training volume) and calculates daily macro + amino acid targets using Mifflin-St Jeor BMR, WHO/FAO 2007, and ACSM guidelines. Includes sport-day adjustments (trail, kayak, climbing, swimming, rest).
+2. **`02_targets.R`** defines your athlete profile (sex, height, weight, age, sports, training volume) and calculates daily macro + amino acid targets using Mifflin-St Jeor BMR, WHO/FAO 2007, and ACSM guidelines. The `sports` field controls which day types are generated. Includes sport-day adjustments (trail, kayak, climbing, swimming, rest).
 
 3. **`03a_optimizer.R`** uses linear programming (`lpSolve`) to find the optimal daily plan: minimizes macro deviation while guaranteeing all 9 amino acids meet WHO/FAO minimums. Supports food locks, exclusions, portability constraints, and meal calorie distribution.
 
