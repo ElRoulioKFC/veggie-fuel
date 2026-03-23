@@ -1,0 +1,60 @@
+# ============================================================================
+# run_single.sub — HTCondor submit file for a single VeggieFuel run
+# ============================================================================
+# Generates optimized daily meal plans and checks amino acid coverage.
+#
+# Before submitting:
+#   1. Edit 'initialdir' to point to your project on shared storage
+#   2. Uncomment and edit '+wishedAcctGroup' for your accounting group
+#   3. Optionally uncomment 'notify_user' for email notifications
+#
+# Submit with:
+#   condor_submit must/run_single.sub
+#
+# Override athlete weight:
+#   Add to your environment before submitting:
+#     export VEGGIEFUEL_WEIGHT=55
+#     condor_submit must/run_single.sub
+# ============================================================================
+
+universe            = vanilla
+executable          = must/run_single.sh
+
+# ── Logging ────────────────────────────────────────────────────────────────
+output              = must/logs/single_$(Cluster).out
+error               = must/logs/single_$(Cluster).err
+log                 = must/logs/single_$(Cluster).log
+
+# ── Environment ────────────────────────────────────────────────────────────
+# Pass your shell environment (R_LIBS_USER, PATH, VEGGIEFUEL_WEIGHT, etc.)
+getenv              = True
+
+# ── Resources ──────────────────────────────────────────────────────────────
+request_cpus        = 1
+request_memory      = 2048
+request_disk        = 512000
+
+# ── Job duration ───────────────────────────────────────────────────────────
+# Flash queue: max 1 hour (this job takes ~1 minute)
++isFlash            = True
+
+# ── Shared storage ─────────────────────────────────────────────────────────
+should_transfer_files = NO
+
+# ── Working directory ──────────────────────────────────────────────────────
+# IMPORTANT: Change this to your project path on shared storage!
+# Example: /lapp_data/mygroup/veggie-fuel
+# Example: /uds_data/mylab/veggie-fuel
+initialdir          = /lapp_data/YOUR_GROUP/veggie-fuel
+
+# ── Accounting group ──────────────────────────────────────────────────────
+# Uncomment and edit ONE of these lines:
+#+wishedAcctGroup   = "group_lapp.YOUR_GROUP"
+#+wishedAcctGroup   = "group_usmb.YOUR_GROUP"
+
+# ── Email notification (optional) ─────────────────────────────────────────
+# Uncomment to receive an email when the job completes:
+#notification       = complete
+#notify_user        = your.email@example.com
+
+queue 1

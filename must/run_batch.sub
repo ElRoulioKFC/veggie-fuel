@@ -1,0 +1,57 @@
+# ============================================================================
+# run_batch.sub — HTCondor submit file for 50 Monte Carlo simulations
+# ============================================================================
+# Each job randomly samples foods into 6 meals and checks amino acid
+# coverage. Jobs are independent — they can run in any order on any node.
+#
+# Submit with:
+#   condor_submit must/run_batch.sub
+#
+# Monitor with:
+#   condor_q
+# ============================================================================
+
+universe            = vanilla
+executable          = must/run_batch.sh
+
+# Each job gets its Process ID (0–49) as the seed argument
+arguments           = $(Process)
+
+# ── Logging ────────────────────────────────────────────────────────────────
+# Separate stdout/stderr per job, shared log file for easy monitoring
+output              = must/logs/sim_$(Process).out
+error               = must/logs/sim_$(Process).err
+log                 = must/logs/batch.log
+
+# ── Environment ────────────────────────────────────────────────────────────
+# Pass your shell environment (R_LIBS_USER, PATH, etc.) to worker nodes
+getenv              = True
+
+# ── Resources ──────────────────────────────────────────────────────────────
+# Each simulation is lightweight: single-threaded, ~few seconds
+request_cpus        = 1
+request_memory      = 2048
+request_disk        = 512000
+
+# ── Job duration ───────────────────────────────────────────────────────────
+# Flash queue: max 1 hour (these jobs take seconds)
++isFlash            = True
+
+# ── Shared storage ─────────────────────────────────────────────────────────
+# The project lives on shared storage (/lapp_data/ or /uds_data/),
+# so worker nodes can access all files directly — no file transfer needed
+should_transfer_files = NO
+
+# ── Working directory ──────────────────────────────────────────────────────
+# IMPORTANT: Change this to your project path on shared storage!
+# Example: /lapp_data/mygroup/veggie-fuel
+# Example: /uds_data/mylab/veggie-fuel
+initialdir          = /lapp_data/YOUR_GROUP/veggie-fuel
+
+# ── Accounting group ──────────────────────────────────────────────────────
+# Uncomment and edit ONE of these lines to match your group:
+#+wishedAcctGroup   = "group_lapp.YOUR_GROUP"
+#+wishedAcctGroup   = "group_usmb.YOUR_GROUP"
+
+# ── Submit 50 jobs ─────────────────────────────────────────────────────────
+queue 50

@@ -19,4 +19,10 @@ Thumbs.db
 .vscode/
 .idea/
 
-claude.md
+# MUST cluster logs
+must/logs/*.out
+must/logs/*.err
+must/logs/*.log
+must/dag_workflow.dag.*
+
+CLAUDE.md

@@ -1,0 +1,30 @@
+# ============================================================================
+# dag_workflow.dag — DAGMan workflow: run simulations, then collect results
+# ============================================================================
+# This DAGMan file chains two jobs:
+#   1. BATCH — 50 Monte Carlo simulations (run in parallel)
+#   2. COLLECT — combines all results into one summary file
+#
+# DAGMan ensures COLLECT only runs after ALL 50 BATCH jobs finish.
+#
+# Submit with:
+#   condor_submit_dag must/dag_workflow.dag
+#
+# Monitor with:
+#   condor_q                          # see running jobs
+#   cat must/dag_workflow.dag.dagman.out  # DAGMan log
+#
+# The DAG creates its own log files alongside this file:
+#   must/dag_workflow.dag.dagman.out
+#   must/dag_workflow.dag.dagman.log
+#   must/dag_workflow.dag.lib.out
+# ============================================================================
+
+# Step 1: Run 50 Monte Carlo simulations (each with a different seed)
+JOB  BATCH    must/run_batch.sub
+
+# Step 2: Collect and summarize all simulation results
+JOB  COLLECT  must/collect_results.sub
+
+# Dependency: COLLECT waits for all BATCH jobs to finish
+PARENT BATCH CHILD COLLECT

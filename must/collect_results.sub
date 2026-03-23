@@ -1,0 +1,42 @@
+# ============================================================================
+# collect_results.sub — HTCondor submit file for collecting simulation results
+# ============================================================================
+# Used by DAGMan (dag_workflow.dag) as the CHILD job that runs after
+# all 50 simulations have completed.
+#
+# Can also be submitted standalone:
+#   condor_submit must/collect_results.sub
+# ============================================================================
+
+universe            = vanilla
+executable          = must/collect_results.sh
+
+# ── Logging ────────────────────────────────────────────────────────────────
+output              = must/logs/collect.out
+error               = must/logs/collect.err
+log                 = must/logs/collect.log
+
+# ── Environment ────────────────────────────────────────────────────────────
+getenv              = True
+
+# ── Resources ──────────────────────────────────────────────────────────────
+# Collection is very lightweight
+request_cpus        = 1
+request_memory      = 1024
+request_disk        = 256000
+
+# ── Job duration ───────────────────────────────────────────────────────────
++isFlash            = True
+
+# ── Shared storage ─────────────────────────────────────────────────────────
+should_transfer_files = NO
+
+# ── Working directory ──────────────────────────────────────────────────────
+# IMPORTANT: Change this to match your project path!
+initialdir          = /lapp_data/YOUR_GROUP/veggie-fuel
+
+# ── Accounting group ──────────────────────────────────────────────────────
+#+wishedAcctGroup   = "group_lapp.YOUR_GROUP"
+#+wishedAcctGroup   = "group_usmb.YOUR_GROUP"
+
+queue 1

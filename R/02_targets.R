@@ -127,14 +127,16 @@ compute_amino_targets <- function(profile) {
 # ── Sport-specific adjustments ───────────────────────────────────────────────
 
 sport_day_adjustments <- tibble(
-  sport  = c("trail", "kayak", "rest"),
-  carb_pct  = c(0.58, 0.52, 0.50),
-  protein_pct = c(0.16, 0.19, 0.18),
-  fat_pct   = c(0.26, 0.29, 0.32),
-  kcal_mult = c(1.10, 1.00, 0.80),
+  sport  = c("trail", "kayak", "climbing", "swimming", "rest"),
+  carb_pct  = c(0.58, 0.52, 0.50, 0.58, 0.50),
+  protein_pct = c(0.16, 0.19, 0.20, 0.17, 0.18),
+  fat_pct   = c(0.26, 0.29, 0.30, 0.25, 0.32),
+  kcal_mult = c(1.10, 1.00, 0.95, 1.20, 0.80),
   description = c(
     "Trail day: high carb for long effort, moderate protein",
     "Kayak day: higher protein for upper body, moderate carb",
+    "Climbing day: high protein for grip recovery, power-to-weight focus (ISSN/Cogent Medicine 2019)",
+    "Swimming day: high carb + very high expenditure from thermoregulation (Costill 1988, PMC5772075)",
     "Rest day: reduced calories, maintain protein"
   )
 )

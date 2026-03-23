@@ -109,6 +109,14 @@ kcal mult     1.10x         1.00x         0.95x         1.15x
 
 ---
 
+## Running on the MUST HPC Cluster
+
+VeggieFuel can run on the [MUST data centre](https://doc.must-datacentre.fr/) (HTCondor cluster at Université Savoie Mont Blanc / CNRS/IN2P3). The `must/` folder contains everything you need: setup scripts, HTCondor submit files, a Monte Carlo simulation workflow, and a step-by-step guide.
+
+See [must/README.md](must/README.md) for the full walkthrough.
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -132,6 +140,14 @@ veggie-fuel/
 ├── tests/
 │   ├── test_amino.R       ← Core validation tests (40 assertions)
 │   └── test_weekly.R      ← Weekly planner tests (15 assertions)
+├── must/                  ← MUST HPC cluster deployment (HTCondor)
+│   ├── README.md          ← Step-by-step cluster guide
+│   ├── setup_r.sh         ← One-time R environment setup
+│   ├── run_single.sh/sub  ← Single job (meal planner + amino check)
+│   ├── run_batch.sh/sub   ← Batch: 50 Monte Carlo simulations
+│   ├── run_simulation.R   ← Monte Carlo food sampling script
+│   ├── collect_results.R  ← Combine simulation outputs
+│   └── dag_workflow.dag   ← DAGMan workflow (sims → collect)
 ├── .gitignore
 └── LICENSE
 ```
